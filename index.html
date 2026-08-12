@@ -73,7 +73,8 @@
       <input type="hidden" id="cert-edit-id" value="">
       <div class="form-row">
         <label for="cert-name">자격증명</label>
-        <input type="text" id="cert-name" required>
+        <input type="text" id="cert-name" list="cert-name-options" autocomplete="off" required>
+        <datalist id="cert-name-options"></datalist>
       </div>
       <div class="form-row">
         <label for="cert-category">분류</label>

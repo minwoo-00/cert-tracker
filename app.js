@@ -240,15 +240,35 @@ function initCertifications() {
 }
 
 // ===== 시험 일정 (M2) =====
-// EXAM_CATALOG는 공식 시험 일정을 흉내 낸 참고용 시드 데이터다. 실제 시행처 공고와 다를 수 있다.
-// 사용자가 CRUD하지 않는 정적 참고 데이터라 테이블화하지 않고 그대로 둔다.
-const EXAM_CATALOG = [
-  { id: "cat-1", certificationName: "정보처리기사", category: "IT", round: "2026년 3회", examDate: "2026-09-19" },
-  { id: "cat-2", certificationName: "정보처리기사", category: "IT", round: "2027년 1회", examDate: "2027-03-06" },
-  { id: "cat-3", certificationName: "SQLD", category: "IT", round: "2026년 45회", examDate: "2026-09-05" },
-  { id: "cat-4", certificationName: "컴퓨터활용능력 1급", category: "사무", round: "2026년 6회", examDate: "2026-10-10" },
-  { id: "cat-5", certificationName: "정보보안기사", category: "IT", round: "2026년 2회", examDate: "2026-11-14" },
-];
+// EXAM_CATALOG는 Q-net/데이터자격검정/금융투자협회 등 시행처 공고를 바탕으로 큐레이션한
+// 공식 시험 일정 참고 데이터다(Supabase "exam_catalog" 테이블, 앱에서는 읽기 전용).
+let EXAM_CATALOG = [];
+
+async function fetchExamCatalog() {
+  const { data, error } = await supabaseClient
+    .from("exam_catalog")
+    .select("*")
+    .order("exam_date", { ascending: true });
+  if (error) {
+    alert("공식 시험 일정을 불러오지 못했습니다: " + error.message);
+    return;
+  }
+  EXAM_CATALOG = data.map((row) => ({
+    id: row.id,
+    certificationName: row.certification_name,
+    category: row.category,
+    round: row.round,
+    examDate: row.exam_date,
+  }));
+  renderCertNameOptions();
+}
+
+function renderCertNameOptions() {
+  const datalist = document.getElementById("cert-name-options");
+  if (!datalist) return;
+  const names = [...new Set(EXAM_CATALOG.map((entry) => entry.certificationName))];
+  datalist.innerHTML = names.map((name) => `<option value="${escapeHtml(name)}">`).join("");
+}
 
 function calcDday(dateStr) {
   const today = new Date();
@@ -762,7 +782,7 @@ function initCalendar() {
 
 async function init() {
   initTabs();
-  await Promise.all([fetchCertifications(), fetchExams(), fetchChecklist()]);
+  await Promise.all([fetchCertifications(), fetchExams(), fetchChecklist(), fetchExamCatalog()]);
   initCertifications();
   initExams();
   initChecklist();
