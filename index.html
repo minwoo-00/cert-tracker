@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자격증 학습 관리 플랫폼</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>자격증 학습 관리 플랫폼</h1>
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="dashboard">대시보드</button>
+    <button class="tab-btn" data-tab="certifications">자격증 관리</button>
+    <button class="tab-btn" data-tab="exams">시험 일정</button>
+    <button class="tab-btn" data-tab="checklist">학습 체크리스트</button>
+  </nav>
+</header>
+
+<main>
+  <section id="dashboard" class="tab-section active">
+    <p class="placeholder">대시보드 (M4에서 구현 예정)</p>
+  </section>
+
+  <section id="certifications" class="tab-section">
+    <h2>자격증 관리</h2>
+
+    <form id="cert-form" class="card-form">
+      <input type="hidden" id="cert-edit-id" value="">
+      <div class="form-row">
+        <label for="cert-name">자격증명</label>
+        <input type="text" id="cert-name" required>
+      </div>
+      <div class="form-row">
+        <label for="cert-category">분류</label>
+        <input type="text" id="cert-category" placeholder="예: IT, 어학 (선택)">
+      </div>
+      <div class="form-row">
+        <label for="cert-status">상태</label>
+        <select id="cert-status">
+          <option value="준비중">준비중</option>
+          <option value="응시예정">응시예정</option>
+          <option value="합격">합격</option>
+          <option value="불합격">불합격</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="cert-memo">메모</label>
+        <textarea id="cert-memo" placeholder="선택 입력"></textarea>
+      </div>
+      <div class="form-actions">
+        <button type="submit" id="cert-submit-btn" class="btn-primary">등록</button>
+        <button type="button" id="cert-cancel-btn" class="btn-secondary hidden">취소</button>
+      </div>
+    </form>
+
+    <ul id="cert-list" class="item-list"></ul>
+  </section>
+
+  <section id="exams" class="tab-section">
+    <h2>시험 일정</h2>
+
+    <div class="form-row">
+      <label for="exam-cert-select">자격증 선택</label>
+      <select id="exam-cert-select"></select>
+    </div>
+
+    <form id="exam-form" class="card-form">
+      <input type="hidden" id="exam-edit-id" value="">
+      <div class="form-row">
+        <label for="exam-catalog-select">공식 일정에서 선택 (선택사항)</label>
+        <select id="exam-catalog-select">
+          <option value="">직접 입력</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label for="exam-round">회차</label>
+        <input type="text" id="exam-round" placeholder="예: 2026년 3회">
+      </div>
+      <div class="form-row">
+        <label for="exam-date">시험일</label>
+        <input type="date" id="exam-date" required>
+      </div>
+      <div class="form-row">
+        <label for="exam-result">결과</label>
+        <select id="exam-result">
+          <option value="대기">대기</option>
+          <option value="합격">합격</option>
+          <option value="불합격">불합격</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button type="submit" id="exam-submit-btn" class="btn-primary">등록</button>
+        <button type="button" id="exam-cancel-btn" class="btn-secondary hidden">취소</button>
+      </div>
+    </form>
+
+    <ul id="exam-list" class="item-list"></ul>
+  </section>
+
+  <section id="checklist" class="tab-section">
+    <h2>학습 체크리스트</h2>
+
+    <div class="form-row">
+      <label for="checklist-cert-select">자격증 선택</label>
+      <select id="checklist-cert-select"></select>
+    </div>
+
+    <p id="checklist-progress" class="progress-summary"></p>
+
+    <form id="checklist-form" class="card-form">
+      <div class="form-row">
+        <label for="checklist-title">학습 항목</label>
+        <input type="text" id="checklist-title" placeholder="예: 1과목 - 소프트웨어 설계" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">추가</button>
+      </div>
+    </form>
+
+    <ul id="checklist-list" class="item-list"></ul>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
