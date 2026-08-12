@@ -19,7 +19,23 @@
 
 <main>
   <section id="dashboard" class="tab-section active">
-    <p class="placeholder">대시보드 (M4에서 구현 예정)</p>
+    <h2>대시보드</h2>
+
+    <div class="dashboard-summary">
+      <div class="stat-card">
+        <span class="stat-label">전체 합격률</span>
+        <span class="stat-value" id="stat-pass-rate">-</span>
+      </div>
+    </div>
+
+    <h3>보유(합격) 자격증</h3>
+    <ul id="dashboard-passed-list" class="item-list"></ul>
+
+    <h3>자격증별 학습 진도율</h3>
+    <ul id="dashboard-progress-list" class="item-list"></ul>
+
+    <h3>다가오는 시험</h3>
+    <ul id="dashboard-upcoming-list" class="item-list"></ul>
   </section>
 
   <section id="certifications" class="tab-section">

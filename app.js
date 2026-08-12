@@ -40,6 +40,9 @@ function switchTab(tabName) {
   document.querySelectorAll(".tab-section").forEach((section) => {
     section.classList.toggle("active", section.id === tabName);
   });
+  if (tabName === "dashboard") {
+    renderDashboard();
+  }
 }
 
 function initTabs() {
@@ -495,6 +498,90 @@ function initChecklist() {
   renderChecklist();
 }
 
+// ===== 통계 대시보드 (M4) =====
+
+function calcPassRate() {
+  const decided = state.certifications.filter(
+    (c) => c.status === "합격" || c.status === "불합격"
+  );
+  if (decided.length === 0) return null;
+  const passed = decided.filter((c) => c.status === "합격").length;
+  return Math.round((passed / decided.length) * 100);
+}
+
+function renderDashboard() {
+  const passRate = calcPassRate();
+  const passRateEl = document.getElementById("stat-pass-rate");
+  if (passRateEl) {
+    passRateEl.textContent = passRate === null ? "기록 없음" : `${passRate}%`;
+  }
+
+  const passedList = document.getElementById("dashboard-passed-list");
+  if (passedList) {
+    const passedCerts = state.certifications.filter((c) => c.status === "합격");
+    passedList.innerHTML =
+      passedCerts.length === 0
+        ? '<li class="empty">합격한 자격증이 없습니다.</li>'
+        : passedCerts
+            .map(
+              (cert) => `
+      <li class="list-item">
+        <div class="list-item-main">
+          <strong>${escapeHtml(cert.name)}</strong>
+          ${cert.category ? `<span class="tag">${escapeHtml(cert.category)}</span>` : ""}
+        </div>
+      </li>`
+            )
+            .join("");
+  }
+
+  const progressList = document.getElementById("dashboard-progress-list");
+  if (progressList) {
+    progressList.innerHTML =
+      state.certifications.length === 0
+        ? '<li class="empty">등록된 자격증이 없습니다.</li>'
+        : state.certifications
+            .map(
+              (cert) => `
+      <li class="list-item">
+        <div class="list-item-main">
+          <strong>${escapeHtml(cert.name)}</strong>
+          <span class="tag">${calcProgress(cert.id)}%</span>
+        </div>
+      </li>`
+            )
+            .join("");
+  }
+
+  const upcomingList = document.getElementById("dashboard-upcoming-list");
+  if (upcomingList) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const upcoming = state.exams
+      .filter((exam) => new Date(exam.examDate) >= today)
+      .slice()
+      .sort((a, b) => new Date(a.examDate) - new Date(b.examDate))
+      .slice(0, 5);
+
+    upcomingList.innerHTML =
+      upcoming.length === 0
+        ? '<li class="empty">다가오는 시험이 없습니다.</li>'
+        : upcoming
+            .map((exam) => {
+              const cert = state.certifications.find((c) => c.id === exam.certificationId);
+              return `
+      <li class="list-item">
+        <div class="list-item-main">
+          <strong>${escapeHtml(cert ? cert.name : "알 수 없음")}</strong>
+          <span class="badge badge-dday">${calcDday(exam.examDate)}</span>
+          <span class="tag">${exam.examDate}</span>
+        </div>
+      </li>`;
+            })
+            .join("");
+  }
+}
+
 // ===== 초기화 =====
 
 function init() {
@@ -502,6 +589,7 @@ function init() {
   initCertifications();
   initExams();
   initChecklist();
+  renderDashboard();
   saveState();
 }
 
