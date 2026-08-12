@@ -2,6 +2,28 @@
   box-sizing: border-box;
 }
 
+:root {
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 10px;
+  --space-md: 12px;
+  --space-base: 16px;
+  --space-lg: 20px;
+  --space-xl: 24px;
+  --space-xxl: 32px;
+
+  --radius-lg: 8px;
+  --radius-xl: 16px;
+  --radius-xxl: 24px;
+  --radius-full: 100px;
+
+  --color-primary: #0143b5;
+  --color-ink-deep: #0b0f14;
+  --color-slate: #4b5563;
+  --color-steel: #6b7280;
+  --color-hairline-soft: #e5e7eb;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -11,28 +33,45 @@ body {
 
 .app-header {
   background: #ffffff;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-hairline-soft);
+  padding: 0 var(--space-xl);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.app-header h1 {
-  margin: 0 0 12px;
-  font-size: 20px;
+.app-header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xl);
+  height: 64px;
+  flex-wrap: wrap;
+}
+
+.app-logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--color-ink-deep);
+  white-space: nowrap;
 }
 
 .tabs {
   display: flex;
-  gap: 8px;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
 }
 
 .tab-btn {
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--color-hairline-soft);
   background: #ffffff;
-  color: #374151;
+  color: #1f2937;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: var(--radius-full);
   cursor: pointer;
   font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.14px;
 }
 
 .tab-btn:hover {
@@ -40,8 +79,8 @@ body {
 }
 
 .tab-btn.active {
-  background: #2563eb;
-  border-color: #2563eb;
+  background: var(--color-ink-deep);
+  border-color: var(--color-ink-deep);
   color: #ffffff;
 }
 
@@ -78,12 +117,12 @@ main {
 .card-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  margin-bottom: 20px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  gap: var(--space-base);
+  padding: var(--space-xl);
+  margin-bottom: var(--space-xl);
+  background: #ffffff;
+  border: 1px solid var(--color-hairline-soft);
+  border-radius: var(--radius-xl);
 }
 
 .form-row {
@@ -94,17 +133,20 @@ main {
 
 .form-row label {
   font-size: 13px;
-  color: #4b5563;
+  font-weight: 700;
+  letter-spacing: -0.14px;
+  color: var(--color-slate);
 }
 
 .form-row input,
 .form-row select,
 .form-row textarea {
-  padding: 8px 10px;
+  padding: 12px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   font-size: 14px;
   font-family: inherit;
+  min-height: 44px;
 }
 
 .form-row textarea {
@@ -114,26 +156,29 @@ main {
 
 .form-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--space-xs);
 }
 
 .form-actions button {
-  padding: 8px 16px;
-  border-radius: 6px;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
   font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.14px;
   cursor: pointer;
+  min-height: 44px;
 }
 
 .btn-primary {
-  border: 1px solid #2563eb;
-  background: #2563eb;
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
   color: #fff;
 }
 
 .btn-secondary {
-  border: 1px solid #d1d5db;
-  background: #fff;
-  color: #374151;
+  border: 2px solid var(--color-ink-deep);
+  background: transparent;
+  color: var(--color-ink-deep);
 }
 
 .hidden {
@@ -197,16 +242,18 @@ main {
 
 .tag {
   font-size: 12px;
+  font-weight: 700;
   color: #6b7280;
   background: #f3f4f6;
-  padding: 2px 8px;
-  border-radius: 999px;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
 }
 
 .badge {
   font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
   color: #fff;
 }
 
@@ -215,7 +262,7 @@ main {
 }
 
 .badge-scheduled {
-  background: #2563eb;
+  background: var(--color-primary);
 }
 
 .badge-passed {
@@ -233,16 +280,18 @@ main {
 #exam-cert-select,
 #checklist-cert-select {
   margin-bottom: 16px;
-  padding: 8px 10px;
+  padding: 12px 14px;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
   font-size: 14px;
+  min-height: 44px;
 }
 
 .progress-summary {
   font-size: 14px;
-  font-weight: 600;
-  color: #2563eb;
+  font-weight: 700;
+  letter-spacing: -0.14px;
+  color: var(--color-primary);
   margin: 0 0 16px;
 }
 
@@ -264,38 +313,243 @@ main {
   text-decoration: line-through;
 }
 
-.tab-section h3 {
-  font-size: 15px;
-  margin: 24px 0 10px;
+/* 대시보드 (DESIGN.md 원칙 적용: hairline 카드 + flat elevation, 22px 이하 절제된 헤딩,
+   body 텍스트 negative letter-spacing, pill 배지, cobalt 강조색은 핵심 수치 1곳에만 사용) */
+
+.dash-header {
+  margin-bottom: var(--space-xl);
 }
 
-.tab-section h3:first-of-type {
-  margin-top: 20px;
+.dash-header .dash-title {
+  margin: 0 0 4px;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-ink-deep);
 }
 
-.dashboard-summary {
-  display: flex;
-  gap: 12px;
+.dash-subtitle {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.43;
+  letter-spacing: -0.14px;
+  color: var(--color-steel);
 }
 
-.stat-card {
+.dash-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-xl);
+  align-items: start;
+}
+
+.dash-card {
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid var(--color-hairline-soft);
+  border-radius: var(--radius-xl);
+  padding: var(--space-xl);
+  box-shadow: none;
+}
+
+.dash-card-title {
+  margin: 0 0 var(--space-base);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.43;
+  letter-spacing: -0.14px;
+  color: var(--color-slate);
+}
+
+.dash-stat {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 14px 20px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  min-width: 160px;
+  padding-bottom: var(--space-base);
+  margin-bottom: var(--space-base);
+  border-bottom: 1px solid var(--color-hairline-soft);
 }
 
-.stat-label {
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.stat-value {
-  font-size: 22px;
+.dash-stat-label {
+  font-size: 12px;
   font-weight: 700;
-  color: #2563eb;
+  line-height: 1.33;
+  color: var(--color-steel);
+}
+
+.dash-stat-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-primary);
+}
+
+.dash-subsection-title {
+  margin: 0 0 var(--space-xs);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.33;
+  color: var(--color-steel);
+}
+
+.dash-card .item-list {
+  gap: var(--space-xs);
+}
+
+.dash-card .list-item {
+  padding: var(--space-md);
+  border-radius: var(--radius-lg);
+}
+
+.dash-card .list-item-main {
+  flex-wrap: wrap;
+  row-gap: 4px;
+}
+
+.dash-card .list-item-main strong {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.14px;
+  word-break: break-word;
+}
+
+@media (max-width: 767px) {
+  .dash-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dash-stat-value {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-card {
+    padding: var(--space-base);
+  }
+}
+
+/* 대시보드 - 시험 일정 캘린더 */
+
+.dash-calendar-card {
+  margin-top: var(--space-xl);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-base);
+}
+
+.calendar-header .dash-card-title {
+  margin: 0;
+}
+
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.calendar-nav button {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-hairline-soft);
+  background: #ffffff;
+  color: var(--color-ink-deep);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.calendar-month-label {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.14px;
+  color: var(--color-ink-deep);
+  min-width: 88px;
+  text-align: center;
+}
+
+.calendar-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.calendar-weekdays span {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--color-steel);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.calendar-cell {
+  min-height: 64px;
+  padding: 4px;
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.calendar-cell--empty {
+  visibility: hidden;
+}
+
+.calendar-cell--today {
+  background: rgba(1, 67, 181, 0.08);
+  border-color: rgba(1, 67, 181, 0.3);
+}
+
+.calendar-cell--has-exam {
+  border-color: var(--color-hairline-soft);
+}
+
+.calendar-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-ink-deep);
+}
+
+.calendar-exam-tag {
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 1px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+@media (max-width: 480px) {
+  .calendar-cell {
+    min-height: 48px;
+  }
+
+  .calendar-exam-tag {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  .calendar-month-label {
+    min-width: 70px;
+    font-size: 13px;
+  }
 }

@@ -1,35 +1,79 @@
-// ===== 데이터 저장소 (localStorage) =====
-// 추후 Supabase 전환 시 이 구간의 구현부만 교체하면 되도록 분리해둔다.
+// ===== 데이터 저장소 (Supabase / Postgres) =====
 
-const STORAGE_KEY = "cert-tracker-state";
+const SUPABASE_URL = "https://ffekolbihjqybvhafjhr.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZmZWtvbGJpaGpxeWJ2aGFmamhyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY1MDE3MzksImV4cCI6MjEwMjA3NzczOX0.UROdX5RsycbFRGC402-2oqUJ5rNbnZeoAyRba_Se80Y";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function getDefaultState() {
+async function fetchCertifications() {
+  const { data, error } = await supabaseClient
+    .from("certifications")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) {
+    alert("자격증 데이터를 불러오지 못했습니다: " + error.message);
+    return;
+  }
+  state.certifications = data;
+}
+
+function examRowToState(row) {
   return {
-    certifications: [],
-    exams: [],
-    checklist: [],
+    id: row.id,
+    certificationId: row.certification_id,
+    catalogId: row.catalog_id,
+    round: row.round,
+    examDate: row.exam_date,
+    result: row.result,
   };
 }
 
-function loadState() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) {
-    return getDefaultState();
-  }
-  try {
-    return JSON.parse(raw);
-  } catch (e) {
-    return getDefaultState();
-  }
+function examStateToRow(data) {
+  return {
+    certification_id: data.certificationId,
+    catalog_id: data.catalogId,
+    round: data.round,
+    exam_date: data.examDate,
+    result: data.result,
+  };
 }
 
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+async function fetchExams() {
+  const { data, error } = await supabaseClient
+    .from("exams")
+    .select("*")
+    .order("exam_date", { ascending: true });
+  if (error) {
+    alert("시험 일정을 불러오지 못했습니다: " + error.message);
+    return;
+  }
+  state.exams = data.map(examRowToState);
+}
+
+function checklistRowToState(row) {
+  return {
+    id: row.id,
+    certificationId: row.certification_id,
+    title: row.title,
+    done: row.done,
+  };
+}
+
+async function fetchChecklist() {
+  const { data, error } = await supabaseClient
+    .from("checklist")
+    .select("*")
+    .order("created_at", { ascending: true });
+  if (error) {
+    alert("학습 체크리스트를 불러오지 못했습니다: " + error.message);
+    return;
+  }
+  state.checklist = data.map(checklistRowToState);
 }
 
 // ===== 앱 상태 =====
 
-let state = loadState();
+let state = { certifications: [], exams: [], checklist: [] };
 
 // ===== 탭 네비게이션 =====
 
@@ -60,32 +104,47 @@ const STATUS_BADGE_CLASS = {
   불합격: "badge-failed",
 };
 
-function generateId() {
-  return crypto.randomUUID
-    ? crypto.randomUUID()
-    : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
 function escapeHtml(str) {
   const div = document.createElement("div");
   div.textContent = str ?? "";
   return div.innerHTML;
 }
 
-function addCertification(data) {
-  state.certifications.push({ id: generateId(), ...data });
-  saveState();
+async function addCertification(data) {
+  const { data: inserted, error } = await supabaseClient
+    .from("certifications")
+    .insert(data)
+    .select()
+    .single();
+  if (error) {
+    alert("자격증 등록에 실패했습니다: " + error.message);
+    return;
+  }
+  state.certifications.push(inserted);
 }
 
-function updateCertification(id, data) {
+async function updateCertification(id, data) {
+  const { data: updated, error } = await supabaseClient
+    .from("certifications")
+    .update(data)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) {
+    alert("자격증 수정에 실패했습니다: " + error.message);
+    return;
+  }
   const cert = state.certifications.find((c) => c.id === id);
-  if (cert) Object.assign(cert, data);
-  saveState();
+  if (cert) Object.assign(cert, updated);
 }
 
-function deleteCertification(id) {
+async function deleteCertification(id) {
+  const { error } = await supabaseClient.from("certifications").delete().eq("id", id);
+  if (error) {
+    alert("자격증 삭제에 실패했습니다: " + error.message);
+    return;
+  }
   state.certifications = state.certifications.filter((c) => c.id !== id);
-  saveState();
 }
 
 function renderCertifications() {
@@ -130,7 +189,7 @@ function initCertifications() {
   const list = document.getElementById("cert-list");
   const cancelBtn = document.getElementById("cert-cancel-btn");
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const editId = document.getElementById("cert-edit-id").value;
     const data = {
@@ -142,9 +201,9 @@ function initCertifications() {
     if (!data.name) return;
 
     if (editId) {
-      updateCertification(editId, data);
+      await updateCertification(editId, data);
     } else {
-      addCertification(data);
+      await addCertification(data);
     }
     resetCertForm();
     renderCertifications();
@@ -154,7 +213,7 @@ function initCertifications() {
     resetCertForm();
   });
 
-  list.addEventListener("click", (e) => {
+  list.addEventListener("click", async (e) => {
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
 
@@ -172,7 +231,7 @@ function initCertifications() {
 
     if (deleteBtn) {
       if (!confirm("이 자격증을 삭제할까요?")) return;
-      deleteCertification(deleteBtn.dataset.id);
+      await deleteCertification(deleteBtn.dataset.id);
       renderCertifications();
     }
   });
@@ -181,8 +240,8 @@ function initCertifications() {
 }
 
 // ===== 시험 일정 (M2) =====
-// EXAM_CATALOG는 공식 시험 일정을 흉내 낸 참고용 시드 데이터다. 실제 시행처 공고와 다를 수 있으며,
-// 추후 Supabase 전환 시 공용 테이블(read-only)로 옮겨갈 자리다.
+// EXAM_CATALOG는 공식 시험 일정을 흉내 낸 참고용 시드 데이터다. 실제 시행처 공고와 다를 수 있다.
+// 사용자가 CRUD하지 않는 정적 참고 데이터라 테이블화하지 않고 그대로 둔다.
 const EXAM_CATALOG = [
   { id: "cat-1", certificationName: "정보처리기사", category: "IT", round: "2026년 3회", examDate: "2026-09-19" },
   { id: "cat-2", certificationName: "정보처리기사", category: "IT", round: "2027년 1회", examDate: "2027-03-06" },
@@ -201,20 +260,41 @@ function calcDday(dateStr) {
   return diffDays > 0 ? `D-${diffDays}` : `D+${Math.abs(diffDays)}`;
 }
 
-function addExam(data) {
-  state.exams.push({ id: generateId(), ...data });
-  saveState();
+async function addExam(data) {
+  const { data: inserted, error } = await supabaseClient
+    .from("exams")
+    .insert(examStateToRow(data))
+    .select()
+    .single();
+  if (error) {
+    alert("시험 일정 등록에 실패했습니다: " + error.message);
+    return;
+  }
+  state.exams.push(examRowToState(inserted));
 }
 
-function updateExam(id, data) {
+async function updateExam(id, data) {
+  const { data: updated, error } = await supabaseClient
+    .from("exams")
+    .update(examStateToRow(data))
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) {
+    alert("시험 일정 수정에 실패했습니다: " + error.message);
+    return;
+  }
   const exam = state.exams.find((e) => e.id === id);
-  if (exam) Object.assign(exam, data);
-  saveState();
+  if (exam) Object.assign(exam, examRowToState(updated));
 }
 
-function deleteExam(id) {
+async function deleteExam(id) {
+  const { error } = await supabaseClient.from("exams").delete().eq("id", id);
+  if (error) {
+    alert("시험 일정 삭제에 실패했습니다: " + error.message);
+    return;
+  }
   state.exams = state.exams.filter((e) => e.id !== id);
-  saveState();
 }
 
 function renderExamCertOptions() {
@@ -316,7 +396,7 @@ function initExams() {
     }
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const certId = certSelect.value;
     if (!certId) {
@@ -334,9 +414,9 @@ function initExams() {
     if (!data.examDate) return;
 
     if (editId) {
-      updateExam(editId, data);
+      await updateExam(editId, data);
     } else {
-      addExam(data);
+      await addExam(data);
     }
     resetExamForm();
     renderExams();
@@ -346,7 +426,7 @@ function initExams() {
     resetExamForm();
   });
 
-  list.addEventListener("click", (e) => {
+  list.addEventListener("click", async (e) => {
     const editBtn = e.target.closest(".btn-edit");
     const deleteBtn = e.target.closest(".btn-delete");
 
@@ -364,7 +444,7 @@ function initExams() {
 
     if (deleteBtn) {
       if (!confirm("이 시험 일정을 삭제할까요?")) return;
-      deleteExam(deleteBtn.dataset.id);
+      await deleteExam(deleteBtn.dataset.id);
       renderExams();
     }
   });
@@ -376,20 +456,42 @@ function initExams() {
 
 // ===== 학습 체크리스트 (M3) =====
 
-function addChecklistItem(data) {
-  state.checklist.push({ id: generateId(), done: false, ...data });
-  saveState();
+async function addChecklistItem(data) {
+  const { data: inserted, error } = await supabaseClient
+    .from("checklist")
+    .insert({ certification_id: data.certificationId, title: data.title, done: false })
+    .select()
+    .single();
+  if (error) {
+    alert("학습 항목 추가에 실패했습니다: " + error.message);
+    return;
+  }
+  state.checklist.push(checklistRowToState(inserted));
 }
 
-function toggleChecklistItem(id) {
+async function toggleChecklistItem(id) {
   const item = state.checklist.find((i) => i.id === id);
-  if (item) item.done = !item.done;
-  saveState();
+  if (!item) return;
+  const { data: updated, error } = await supabaseClient
+    .from("checklist")
+    .update({ done: !item.done })
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) {
+    alert("학습 항목 상태 변경에 실패했습니다: " + error.message);
+    return;
+  }
+  Object.assign(item, checklistRowToState(updated));
 }
 
-function deleteChecklistItem(id) {
+async function deleteChecklistItem(id) {
+  const { error } = await supabaseClient.from("checklist").delete().eq("id", id);
+  if (error) {
+    alert("학습 항목 삭제에 실패했습니다: " + error.message);
+    return;
+  }
   state.checklist = state.checklist.filter((i) => i.id !== id);
-  saveState();
 }
 
 function calcProgress(certId) {
@@ -462,7 +564,7 @@ function initChecklist() {
     renderChecklist();
   });
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const certId = certSelect.value;
     if (!certId) {
@@ -472,24 +574,24 @@ function initChecklist() {
     const titleInput = document.getElementById("checklist-title");
     const title = titleInput.value.trim();
     if (!title) return;
-    addChecklistItem({ certificationId: certId, title });
+    await addChecklistItem({ certificationId: certId, title });
     titleInput.value = "";
     renderChecklist();
   });
 
-  list.addEventListener("click", (e) => {
+  list.addEventListener("click", async (e) => {
     const deleteBtn = e.target.closest(".btn-delete");
     if (deleteBtn) {
       if (!confirm("이 학습 항목을 삭제할까요?")) return;
-      deleteChecklistItem(deleteBtn.dataset.id);
+      await deleteChecklistItem(deleteBtn.dataset.id);
       renderChecklist();
     }
   });
 
-  list.addEventListener("change", (e) => {
+  list.addEventListener("change", async (e) => {
     const checkbox = e.target.closest(".checklist-toggle");
     if (checkbox) {
-      toggleChecklistItem(checkbox.dataset.id);
+      await toggleChecklistItem(checkbox.dataset.id);
       renderChecklist();
     }
   });
@@ -510,6 +612,8 @@ function calcPassRate() {
 }
 
 function renderDashboard() {
+  renderCalendar();
+
   const passRate = calcPassRate();
   const passRateEl = document.getElementById("stat-pass-rate");
   if (passRateEl) {
@@ -582,15 +686,88 @@ function renderDashboard() {
   }
 }
 
+// ===== 대시보드 - 시험 일정 캘린더 =====
+
+let calendarViewDate = new Date();
+calendarViewDate.setDate(1);
+
+function formatDateKey(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function renderCalendar() {
+  const label = document.getElementById("calendar-month-label");
+  const grid = document.getElementById("calendar-grid");
+  if (!label || !grid) return;
+
+  const year = calendarViewDate.getFullYear();
+  const month = calendarViewDate.getMonth();
+  label.textContent = `${year}년 ${month + 1}월`;
+
+  const startWeekday = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const examsByDate = {};
+  state.exams.forEach((exam) => {
+    if (!examsByDate[exam.examDate]) examsByDate[exam.examDate] = [];
+    const cert = state.certifications.find((c) => c.id === exam.certificationId);
+    examsByDate[exam.examDate].push(cert ? cert.name : "알 수 없음");
+  });
+
+  const todayKey = formatDateKey(new Date());
+  const cells = [];
+
+  for (let i = 0; i < startWeekday; i++) {
+    cells.push('<div class="calendar-cell calendar-cell--empty"></div>');
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = formatDateKey(new Date(year, month, day));
+    const examNames = examsByDate[dateKey] || [];
+    const stateClasses = [
+      dateKey === todayKey ? "calendar-cell--today" : "",
+      examNames.length ? "calendar-cell--has-exam" : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    cells.push(`
+      <div class="calendar-cell ${stateClasses}">
+        <span class="calendar-date">${day}</span>
+        ${examNames
+          .map((name) => `<span class="calendar-exam-tag">${escapeHtml(name)}</span>`)
+          .join("")}
+      </div>`);
+  }
+
+  grid.innerHTML = cells.join("");
+}
+
+function initCalendar() {
+  document.getElementById("calendar-prev").addEventListener("click", () => {
+    calendarViewDate.setMonth(calendarViewDate.getMonth() - 1);
+    renderCalendar();
+  });
+  document.getElementById("calendar-next").addEventListener("click", () => {
+    calendarViewDate.setMonth(calendarViewDate.getMonth() + 1);
+    renderCalendar();
+  });
+  renderCalendar();
+}
+
 // ===== 초기화 =====
 
-function init() {
+async function init() {
   initTabs();
+  await Promise.all([fetchCertifications(), fetchExams(), fetchChecklist()]);
   initCertifications();
   initExams();
   initChecklist();
+  initCalendar();
   renderDashboard();
-  saveState();
 }
 
 document.addEventListener("DOMContentLoaded", init);

@@ -3,39 +3,67 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>자격증 학습 관리 플랫폼</title>
+<title>CertKeep</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header class="app-header">
-  <h1>자격증 학습 관리 플랫폼</h1>
-  <nav class="tabs">
-    <button class="tab-btn active" data-tab="dashboard">대시보드</button>
-    <button class="tab-btn" data-tab="certifications">자격증 관리</button>
-    <button class="tab-btn" data-tab="exams">시험 일정</button>
-    <button class="tab-btn" data-tab="checklist">학습 체크리스트</button>
-  </nav>
+  <div class="app-header-inner">
+    <span class="app-logo">CertKeep</span>
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="dashboard">대시보드</button>
+      <button class="tab-btn" data-tab="certifications">자격증 관리</button>
+      <button class="tab-btn" data-tab="exams">시험 일정</button>
+      <button class="tab-btn" data-tab="checklist">학습 체크리스트</button>
+    </nav>
+  </div>
 </header>
 
 <main>
   <section id="dashboard" class="tab-section active">
-    <h2>대시보드</h2>
+    <div class="dash-header">
+      <h2 class="dash-title">대시보드</h2>
+      <p class="dash-subtitle">자격증 준비 현황을 한눈에 확인하세요</p>
+    </div>
 
-    <div class="dashboard-summary">
-      <div class="stat-card">
-        <span class="stat-label">전체 합격률</span>
-        <span class="stat-value" id="stat-pass-rate">-</span>
+    <div class="dash-grid">
+      <div class="dash-card">
+        <h3 class="dash-card-title">현황 요약</h3>
+        <div class="dash-stat">
+          <span class="dash-stat-label">전체 합격률</span>
+          <span class="dash-stat-value" id="stat-pass-rate">-</span>
+        </div>
+        <div class="dash-subsection">
+          <h4 class="dash-subsection-title">보유(합격) 자격증</h4>
+          <ul id="dashboard-passed-list" class="item-list"></ul>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <h3 class="dash-card-title">자격증별 학습 진도율</h3>
+        <ul id="dashboard-progress-list" class="item-list"></ul>
+      </div>
+
+      <div class="dash-card">
+        <h3 class="dash-card-title">다가오는 시험</h3>
+        <ul id="dashboard-upcoming-list" class="item-list"></ul>
       </div>
     </div>
 
-    <h3>보유(합격) 자격증</h3>
-    <ul id="dashboard-passed-list" class="item-list"></ul>
-
-    <h3>자격증별 학습 진도율</h3>
-    <ul id="dashboard-progress-list" class="item-list"></ul>
-
-    <h3>다가오는 시험</h3>
-    <ul id="dashboard-upcoming-list" class="item-list"></ul>
+    <div class="dash-card dash-calendar-card">
+      <div class="calendar-header">
+        <h3 class="dash-card-title">시험 일정 캘린더</h3>
+        <div class="calendar-nav">
+          <button type="button" id="calendar-prev" aria-label="이전 달">‹</button>
+          <span id="calendar-month-label" class="calendar-month-label"></span>
+          <button type="button" id="calendar-next" aria-label="다음 달">›</button>
+        </div>
+      </div>
+      <div class="calendar-weekdays">
+        <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+      </div>
+      <div id="calendar-grid" class="calendar-grid"></div>
+    </div>
   </section>
 
   <section id="certifications" class="tab-section">
@@ -138,6 +166,7 @@
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
